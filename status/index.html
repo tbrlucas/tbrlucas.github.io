@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#111d31">
+<title>System Status :: tbrlucas</title>
+<link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="/assets/css/style.css">
+<style>
+body{background:#f3f6fa;color:#263449}.status-wrap{max-width:880px;margin:100px auto 45px}.status-hero{background:#111d31;color:#fff;padding:34px;border-radius:13px;margin-bottom:22px;box-shadow:0 15px 38px #172b441c}.status-hero h1{color:#fff;font-size:34px;margin:10px 0}.kicker{font-size:11px;letter-spacing:2px;color:#a9bdd6}.status-hero p{color:#c4d0df}.overall{display:flex;align-items:center;gap:11px;padding:13px 15px;margin-top:23px;border:1px solid #ffffff30;border-radius:8px;background:#ffffff0d}.dot{width:10px;height:10px;border-radius:50%;background:#20b879;box-shadow:0 0 0 4px #20b87925;flex:none}.warn .dot{background:#e5a23c;box-shadow:0 0 0 4px #e5a23c25}.down .dot{background:#dc5965;box-shadow:0 0 0 4px #dc596525}.service{background:#fff;border:1px solid #e2e8ef;border-radius:10px;padding:22px 24px;margin-bottom:13px;box-shadow:0 4px 16px #1e324b08}.service-head{display:flex;align-items:center;justify-content:space-between;gap:14px}.service h2{font-size:20px;margin:0 0 5px}.sub{font-size:12px;color:#8995a5}.service-state{display:flex;align-items:center;gap:9px;font-weight:bold;font-size:13px;white-space:nowrap}.service-state .dot{width:9px;height:9px}.detail{font-size:13px;line-height:1.6;color:#6c7a8c;margin:14px 0 0}.meta{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#8793a3;font-size:12px;margin-top:20px}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions .btn{border-radius:5px}.foot{text-align:center;color:#8994a4;font-size:12px;margin-top:25px}@media(max-width:600px){.status-wrap{margin:78px 12px 30px}.status-hero{padding:25px 21px}.service-head,.meta{align-items:flex-start;flex-direction:column}.status-hero h1{font-size:28px}}
+</style>
+<script src="/assets/js/theme.js" defer></script>
+<link rel="stylesheet" href="/assets/css/seasonal-events.css">
+<script src="/assets/js/seasonal-events.js?v=20261115-auto-calendar" defer></script>
+<script defer>
+(()=>{"use strict";
+const services=[
+{id:"main",name:"Main website",url:"/",config:"/assets/data/maintenance.json"},
+{id:"backup",name:"Backupsite",url:"/backupsite/",config:"/backupsite/assets/data/maintenance.json"}
+];
+const el=id=>document.getElementById(id);
+async function check(s){
+ try{
+  const cr=await fetch(s.config+"?v="+Date.now(),{cache:"no-store"});
+  if(!cr.ok)throw Error("settings");
+  const cfg=await cr.json();
+  if(cfg.enabled===true)return{state:"maintenance",detail:cfg.reason||"Maintenance is in progress.",eta:cfg.eta||""};
+  const r=await fetch(s.url+"?status_check="+Date.now(),{method:"HEAD",cache:"no-store"});
+  if(!r.ok)return{state:"down",detail:"The website returned HTTP "+r.status+".",eta:""};
+  return{state:"up",detail:"The website is responding normally.",eta:""};
+ }catch(e){return{state:"down",detail:"The website or its status settings could not be reached.",eta:""};}
+}
+function label(s){return s==="up"?"Operational":s==="maintenance"?"Under maintenance":"Unavailable";}
+async function refresh(){
+ el("refresh").disabled=true;el("refresh").textContent="Checking…";
+ const results=await Promise.all(services.map(check));
+ const states=results.map((r,i)=>{
+  const node=el(services[i].id);node.className="service-state "+(r.state==="maintenance"?"warn":r.state==="down"?"down":"");
+  node.innerHTML='<span class="dot"></span>'+label(r.state);
+  el(services[i].id+"-detail").textContent=r.detail+(r.eta?" Estimated return: "+r.eta:"");
+  return r.state;
+ });
+ const down=states.includes("down"),maint=states.includes("maintenance");
+ el("overall").className="overall"+(down?" down":maint?" warn":"");
+ el("overall-text").textContent=down?"One or more services are unavailable":maint?"One or more services are under maintenance":"All systems operational";
+ el("checked").textContent="Last checked: "+new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"medium"}).format(new Date());
+ el("refresh").disabled=false;el("refresh").textContent="Check again";
+}
+document.addEventListener("DOMContentLoaded",()=>{refresh();el("refresh").addEventListener("click",refresh);setInterval(refresh,60000);});
+})();
+</script>
+</head><body>
+<header class="site-header"><div class="navbar navbar-fixed-top"><div class="navbar-inner"><div class="container"><a class="brand" href="/">tbrlucas</a><ul class="nav"><li><a href="/">Home</a></li><li class="active"><a href="/status/">Status</a></li></ul></div></div></div></header>
+<main class="container status-wrap">
+<section class="status-hero"><div class="kicker">TBRLUCAS NETWORK / LIVE STATUS</div><h1>System status</h1><p>Current availability for both websites.</p><div class="overall" id="overall"><span class="dot"></span><strong id="overall-text">Checking services…</strong></div></section>
+<section class="service"><div class="service-head"><div><h2>Main website</h2><div class="sub">tbrlucas.github.io</div></div><div class="service-state" id="main"><span class="dot"></span>Checking…</div></div><p class="detail" id="main-detail">Waiting for first check.</p></section>
+<section class="service"><div class="service-head"><div><h2>Backupsite</h2><div class="sub">tbrlucas.github.io/backupsite/</div></div><div class="service-state" id="backup"><span class="dot"></span>Checking…</div></div><p class="detail" id="backup-detail">Waiting for first check.</p></section>
+<div class="meta"><span id="checked">Last checked: waiting…</span><div class="actions"><button id="refresh" class="btn btn-primary" type="button">Check again</button><a class="btn" href="/">Back to website</a></div></div>
+<p class="foot">Checks run when this page is opened and refresh automatically every 60 seconds. Maintenance status follows each site's maintenance settings.</p>
+</main></body></html>
