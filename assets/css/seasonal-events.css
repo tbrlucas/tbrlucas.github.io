@@ -1,0 +1,50 @@
+
+/* TBRLucas seasonal takeover — layered above Bootstrap 2.3.2 */
+:root{--event-accent:#fff;--event-glow:rgba(255,255,255,.3)}
+#seasonal-event{position:relative;z-index:1000;isolation:isolate;overflow:hidden;margin:0 0 24px;color:#fff;text-align:center}
+#seasonal-event .event-inner{position:relative;z-index:3;max-width:1100px;margin:auto;padding:25px 18px 28px}
+#seasonal-event .event-kicker{margin:0 0 7px;font-size:10px;font-weight:bold;letter-spacing:4px;text-transform:uppercase;opacity:.86}
+#seasonal-event .event-title{margin:0;color:#fff;font-size:clamp(34px,6vw,68px);line-height:1;font-weight:900;letter-spacing:-2px;text-shadow:0 3px 0 rgba(0,0,0,.15),0 0 25px var(--event-glow)}
+#seasonal-event .event-subtitle{max-width:680px;margin:13px auto 0;color:rgba(255,255,255,.9);font-size:15px;line-height:1.6}
+#seasonal-event .event-ribbon{display:inline-block;margin-top:17px;padding:7px 13px;border:1px solid rgba(255,255,255,.55);border-radius:99px;color:#fff;font-size:10px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;background:rgba(0,0,0,.13);backdrop-filter:blur(5px)}
+#seasonal-event .event-orb{position:absolute;z-index:1;width:260px;height:260px;border-radius:50%;filter:blur(2px);opacity:.22;pointer-events:none}
+#seasonal-event .event-orb.one{top:-180px;left:8%;background:radial-gradient(circle,#fff,transparent 68%)}
+#seasonal-event .event-orb.two{right:5%;bottom:-210px;background:radial-gradient(circle,#fff,transparent 68%)}
+#seasonal-event-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+body.seasonal-xmas{background:#f3f7f5}
+body.seasonal-xmas:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 50% 0,rgba(31,117,89,.13),transparent 52%),linear-gradient(180deg,#f7fbf9 0%,#edf4f1 100%)}
+.seasonal-xmas #seasonal-event{background:radial-gradient(ellipse at 50% 130%,#d9fff0 0,transparent 48%),linear-gradient(115deg,#071f26 0%,#0b493d 42%,#741c2c 100%);border-bottom:5px solid #d8b45b;box-shadow:0 12px 35px rgba(10,50,42,.24)}
+.seasonal-xmas #seasonal-event:after{content:"";position:absolute;inset:8px;border:1px solid rgba(255,220,145,.55);pointer-events:none}
+.seasonal-xmas #seasonal-event .event-title{font-family:Georgia,serif;font-weight:normal;letter-spacing:1px;text-shadow:0 3px 0 #5a1720,0 0 28px rgba(255,236,185,.5)}
+.seasonal-xmas .navbar-inner{background:linear-gradient(90deg,#092e28,#174c3d 50%,#6c1b2a)!important;border-color:#b18b43!important}
+.seasonal-xmas .navbar .brand,.seasonal-xmas .navbar .nav>li>a{color:#fff!important;text-shadow:0 1px 2px #071b18!important}
+.seasonal-xmas .navbar .nav>.active>a,.seasonal-xmas .navbar .nav>li>a:hover{background:rgba(255,255,255,.14)!important;box-shadow:inset 0 0 14px rgba(255,225,160,.18)!important}
+.seasonal-xmas .btn-primary{background:#9d2637!important;background-image:linear-gradient(#c3424c,#7e1729)!important;border-color:#6e1724!important;box-shadow:0 3px 0 #54101d,0 5px 15px rgba(126,23,41,.22)}
+.seasonal-xmas .well,.seasonal-xmas .article-panel,.seasonal-xmas .download-card,.seasonal-xmas .whats-new-entry,.seasonal-xmas .detail-article{border-color:#d6c49a!important;box-shadow:0 5px 20px rgba(38,78,62,.09)!important}
+.seasonal-xmas .page-title,.seasonal-xmas .blog-heading{border-color:#d8c99f!important}
+.seasonal-xmas .site-footer{border-top:1px solid #d7c69b;padding-top:16px}
+.seasonal-xmas .seasonal-snow{position:fixed;top:-30px;z-index:999;pointer-events:none;color:#fff;text-shadow:0 0 5px #78a9c4;animation:seasonal-snowfall linear infinite}
+@keyframes seasonal-snowfall{to{transform:translate3d(var(--drift),110vh,0) rotate(360deg)}}
+body.seasonal-newyear{background:#080e25}
+body.seasonal-newyear:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 50% -20%,rgba(54,82,158,.55),transparent 58%),linear-gradient(180deg,#0a1230,#080b1b 72%,#11152b)}
+.seasonal-newyear #seasonal-event{background:radial-gradient(ellipse at 50% 120%,rgba(247,190,85,.24),transparent 48%),linear-gradient(120deg,#080d25,#18275a 48%,#090d22);border-bottom:4px solid #d7b66b;box-shadow:0 12px 45px rgba(0,0,0,.42)}
+.seasonal-newyear #seasonal-event:after{content:"";position:absolute;inset:8px;border:1px solid rgba(240,207,132,.55);pointer-events:none}
+.seasonal-newyear #seasonal-event .event-title{font-family:Georgia,serif;color:#ffe7a8;letter-spacing:2px;text-shadow:0 0 10px rgba(255,214,125,.55),0 0 35px rgba(255,190,74,.45)}
+.seasonal-newyear #seasonal-event .event-ribbon{border-color:#d8bd78;color:#ffe8ae}
+.seasonal-newyear .navbar-inner{background:linear-gradient(90deg,#080e26,#182653 55%,#0a1029)!important;border-color:#b99a58!important}
+.seasonal-newyear .navbar .brand,.seasonal-newyear .navbar .nav>li>a{color:#f8e8bd!important;text-shadow:0 1px 3px #000!important}
+.seasonal-newyear .navbar .nav>.active>a,.seasonal-newyear .navbar .nav>li>a:hover{background:rgba(231,194,112,.15)!important;box-shadow:inset 0 0 15px rgba(231,194,112,.15)!important}
+.seasonal-newyear .page.container{color:#e9edf8}
+.seasonal-newyear .page h1,.seasonal-newyear .page h2,.seasonal-newyear .page h3{color:#f4dfad;text-shadow:0 1px 8px rgba(224,184,103,.12)}
+.seasonal-newyear .page p,.seasonal-newyear .page li,.seasonal-newyear .page .lead{color:#d1d8ec}
+.seasonal-newyear .page a:not(.btn){color:#f1cc79}
+.seasonal-newyear .page hr{border-top-color:#303b62;border-bottom-color:#111a38}
+.seasonal-newyear .well,.seasonal-newyear .article-panel,.seasonal-newyear .download-card,.seasonal-newyear .whats-new-entry,.seasonal-newyear .detail-article,.seasonal-newyear .feature-carousel .carousel-inner{color:#e7eaf4;background:linear-gradient(145deg,rgba(27,39,79,.97),rgba(13,21,49,.98))!important;border:1px solid rgba(211,180,112,.42)!important;box-shadow:0 8px 30px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.05)!important}
+.seasonal-newyear .well h3,.seasonal-newyear .download-card h2,.seasonal-newyear .whats-new-entry h2,.seasonal-newyear .detail-article h1{color:#ffe5a6}
+.seasonal-newyear .btn-primary{background:#b78a35!important;background-image:linear-gradient(#e3c477,#9a6b20)!important;border-color:#8c641f!important;color:#171329!important;text-shadow:none!important;box-shadow:0 3px 0 #654716,0 5px 18px rgba(0,0,0,.25)}
+.seasonal-newyear .site-footer{color:#9ba8c8;border-top:1px solid #344064;padding-top:16px}
+.seasonal-newyear .breadcrumb{background:#111a38;border:1px solid #303b62}
+.seasonal-newyear .breadcrumb li{color:#d8c18d;text-shadow:none}
+.seasonal-newyear .notice-copy{background:#121d40;border-color:#3d4b73}
+@media(max-width:767px){#seasonal-event .event-inner{padding:23px 14px}#seasonal-event .event-title{font-size:39px;letter-spacing:0}.seasonal-xmas .navbar-inner,.seasonal-newyear .navbar-inner{background-image:none!important}}
+@media(prefers-reduced-motion:reduce){.seasonal-snow{display:none!important}*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
