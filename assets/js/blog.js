@@ -17,8 +17,23 @@
   const postUrl = (post) => "/blog/post.html?slug=" + encodeURIComponent(post.slug || "");
 
   // Small, safe Markdown-style renderer for the formatting supported by the blog editor.
+  const safeMarkdownUrl = (value, image = false) => {
+    const url = String(value || "").trim();
+    if (/^https:\/\//i.test(url)) return escapeHtml(url);
+    if (!image && /^\/backupsite\//.test(url)) return escapeHtml(url);
+    if (image && /^\/backupsite\/assets\/images\//.test(url)) return escapeHtml(url);
+    return "";
+  };
   const renderInline = (value) => {
     let text = escapeHtml(value);
+    text = text.replace(/!\[([^\]]*)\]\((https:\/\/[^)\s]+|\/backupsite\/assets\/images\/[^)\s]+)\)/g, (match, alt, url) => {
+      const safe = safeMarkdownUrl(url, true);
+      return safe ? '<img class="blog-inline-image" src="' + safe + '" alt="' + alt + '" loading="lazy">' : alt;
+    });
+    text = text.replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+|\/backupsite\/[^)\s]+)\)/g, (match, label, url) => {
+      const safe = safeMarkdownUrl(url, false);
+      return safe ? '<a href="' + safe + '" target="_blank" rel="noopener noreferrer">' + label + '</a>' : label;
+    });
     text = text.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>");
     text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     text = text.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>");
@@ -67,6 +82,7 @@
     const themeLabels = {"default":"Default theme","ios-6":"iOS 6 edition","android-market-2012":"Android Market 2012 edition","dark-2010s":"Dark 2010s edition","aero":"Aero special edition","cydia-classic":"Cydia Classic edition"};
     return `
       <article class="blog-card blog-card-${escapeHtml(theme)}">
+        ${safeMarkdownUrl(post.coverImage, true) ? '<a class="blog-card-cover-link" href="' + postUrl(post) + '"><img class="blog-card-cover" src="' + safeMarkdownUrl(post.coverImage, true) + '" alt="" loading="lazy"></a>' : ''}
         <div class="blog-card-meta"><span>${formatDate(post.date)}</span><span>${escapeHtml(themeLabels[theme] || "Blog post")}</span></div>
         <h3><a href="${postUrl(post)}">${escapeHtml(post.title || "Untitled")}</a></h3>
         <p>${escapeHtml(post.excerpt || "")}</p>
@@ -74,7 +90,7 @@
       </article>`;
   };
 
-  fetch("/assets/data/posts.json?v=20261115-market-markdown", { cache: "no-store" })
+  fetch("/assets/data/posts.json?v=20261118-media-links", { cache: "no-store" })
     .then((response) => {
       if (!response.ok) throw new Error("Could not load the posts file.");
       return response.json();
@@ -86,9 +102,25 @@
 
       if (count) count.textContent = posts.length + (posts.length === 1 ? " published post" : " published posts");
       if (postList) {
-        postList.innerHTML = posts.length
-          ? posts.map(cardMarkup).join("")
-          : '<p class="post-empty">There are no published posts yet. Check back soon!</p>';
+        const searchInput = document.getElementById("blog-search");
+        const searchResults = document.getElementById("blog-search-results");
+        const renderPostList = () => {
+          const term = String(searchInput?.value || "").trim().toLocaleLowerCase();
+          const filtered = term ? posts.filter((post) =>
+            [post.title, post.excerpt, post.content, post.date]
+              .some((value) => String(value || "").toLocaleLowerCase().includes(term))
+          ) : posts;
+          postList.innerHTML = filtered.length
+            ? filtered.map(cardMarkup).join("")
+            : '<p class="post-empty">No articles match your search. Try another word.</p>';
+          if (searchResults) {
+            searchResults.textContent = term
+              ? filtered.length + (filtered.length === 1 ? " result" : " results")
+              : "Showing all " + posts.length + (posts.length === 1 ? " article" : " articles");
+          }
+        };
+        if (searchInput) searchInput.addEventListener("input", renderPostList);
+        renderPostList();
       }
       if (homeList) {
         const latest = posts.slice(0, 3);
@@ -129,7 +161,8 @@
           return;
         }
 
-        const content = renderContent(post.content);
+        const coverImage = safeMarkdownUrl(post.coverImage, true);
+        const content = (coverImage ? '<figure class="blog-cover-figure"><img class="blog-cover-image" src="' + coverImage + '" alt="' + escapeHtml(post.title || "Article cover") + '"></figure>' : '') + renderContent(post.content);
         const theme = post.design || "default";
         if (theme === "android-market-2012") {
           document.body.classList.add("android-market-page");
@@ -252,6 +285,19 @@
           article.className = "well article-panel";
           article.innerHTML = `<div class="copy-panel"><p class="blog-list-meta">${formatDate(post.date)}</p><h1>${escapeHtml(post.title || "Untitled")}</h1><p class="article-excerpt">${escapeHtml(post.excerpt || "")}</p><div class="blog-article-content">${content}</div></div>`;
         }
+        const currentIndex = posts.findIndex((item) => item.slug === post.slug);
+        const newerPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
+        const olderPost = currentIndex >= 0 && currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+        const navigation = document.createElement("nav");
+        navigation.className = "blog-post-navigation";
+        navigation.setAttribute("aria-label", "More blog articles");
+        navigation.innerHTML = `
+          <div class="blog-post-navigation-heading"><span>KEEP READING</span><a href="/blog/">All articles</a></div>
+          <div class="blog-post-navigation-links">
+            ${newerPost ? `<a class="blog-post-nav-item" href="${postUrl(newerPost)}"><span>← NEWER ARTICLE</span><strong>${escapeHtml(newerPost.title || "Untitled")}</strong></a>` : '<span class="blog-post-nav-empty">You are viewing the newest article.</span>'}
+            ${olderPost ? `<a class="blog-post-nav-item blog-post-nav-older" href="${postUrl(olderPost)}"><span>OLDER ARTICLE →</span><strong>${escapeHtml(olderPost.title || "Untitled")}</strong></a>` : '<span class="blog-post-nav-empty">You are viewing the oldest article.</span>'}
+          </div>`;
+        article.appendChild(navigation);
         document.title = `tbrlucas :: ${post.title || "blog post"}`;
       }
     })
