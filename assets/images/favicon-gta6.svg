@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#ff70ad"/><stop offset=".48" stop-color="#ffb17b"/><stop offset="1" stop-color="#3ad2c7"/></linearGradient><linearGradient id="gold" x2="0" y2="1"><stop stop-color="#fff6c9"/><stop offset="1" stop-color="#f4c85d"/></linearGradient></defs>
+<rect width="64" height="64" rx="14" fill="#24172d"/><rect x="4" y="4" width="56" height="56" rx="11" fill="url(#sky)"/>
+<circle cx="32" cy="25" r="14" fill="#ffe0a1" opacity=".9"/><path d="M4 40h56v20H4z" fill="#19364a"/><path d="M4 46h56M4 52h56M18 40l-5 20M32 40v20M46 40l5 20" stroke="#ff78ad" stroke-width="1.2" opacity=".8"/>
+<path d="M13 12h38v8H36v25h-8V20H13z" fill="url(#gold)" stroke="#43213a" stroke-width="1.4" stroke-linejoin="round"/>
+</svg>
