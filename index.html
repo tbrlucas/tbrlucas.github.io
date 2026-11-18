@@ -217,7 +217,7 @@
   fetch("/assets/data/whats-new.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw Error();return r.json();}).then(function(data){
     var updates=(Array.isArray(data.updates)?data.updates:[]).filter(function(x){return x&&x.published===true;}).sort(function(a,b){return (String(b.date)+String(b.time||"")).localeCompare(String(a.date)+String(a.time||""));}).slice(0,3);
     if(!updates.length){target.innerHTML='<p class="post-empty">No updates yet. Check back soon!</p>';return;}
-    target.innerHTML=updates.map(function(item){return '<article class="home-whats-new-item"><div class="home-whats-new-meta"><time datetime="'+esc(item.date)+'">'+esc(formatDate(item.date))+'</time><span>'+esc(item.category||"Update")+'</span></div><h3>'+esc(item.title)+'</h3><p>'+esc(item.summary)+'</p><a href="/whats-new/post.html?id='+encodeURIComponent(item.id)+'">Read update <span aria-hidden="true">→</span></a></article>';}).join("");
+    target.innerHTML=updates.map(function(item){return '<article class="home-whats-new-item"><div class="home-whats-new-meta"><time datetime="'+esc(item.date)+'">'+esc(formatDate(item.date))+'</time><span>'+esc(item.category||"Update")+'</span></div><h3>'+esc(item.title)+'</h3><div class="formatted-content">'+(window.TBRLucasFormatting?window.TBRLucasFormatting.render(item.summary):'<p>'+esc(item.summary)+'</p>')+'</div><a href="/whats-new/post.html?id='+encodeURIComponent(item.id)+'">Read update <span aria-hidden="true">→</span></a></article>';}).join("");
   }).catch(function(){target.innerHTML='<p class="post-empty">Latest updates are temporarily unavailable.</p>';});
 })();
 </script>
