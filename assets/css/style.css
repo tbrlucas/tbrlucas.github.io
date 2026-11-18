@@ -824,7 +824,8 @@ html[data-theme="dark"] .home-whats-new-meta span{color:#b9dafa;background:#2948
 
 
 /* Shared Markdown-style formatting for download and What's New content. */
-.formatted-content h2,.formatted-content h3{margin:20px 0 10px;line-height:1.3}
+.formatted-content h2,.formatted-content h3,.formatted-content h4,.formatted-content h5,.formatted-content h6{margin:20px 0 10px;line-height:1.3}
+.formatted-content h4,.formatted-content h5,.formatted-content h6{font-size:1.05em}
 .formatted-content p{margin:0 0 14px}
 .formatted-content ul{margin:0 0 16px 24px}
 .formatted-content .formatted-image{display:block;max-width:100%;height:auto;margin:14px 0;border-radius:6px}
