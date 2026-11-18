@@ -2,7 +2,7 @@
   const esc = value => String(value ?? "").replace(/[&<>"']/g, char => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   })[char]);
-  const safeUrl = value => /^https:\/\//i.test(String(value || "").trim()) ? esc(String(value).trim()) : "";
+  const safeUrl = value => /^https:\/\//i.test(String(value || "").trim()) ? String(value).trim() : "";
   const inline = value => {
     let text = esc(value);
     text = text.replace(/!\[([^\]]*)\]\((https:\/\/[^)\s]+)\)/g, (match, alt, url) => {
