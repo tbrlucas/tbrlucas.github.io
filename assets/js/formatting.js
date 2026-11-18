@@ -25,9 +25,9 @@
     while (i < lines.length) {
       const line = lines[i];
       if (!line.trim()) { i++; continue; }
-      const heading = /^(#{1,2})\s+(.+)$/.exec(line.trim());
+      const heading = /^(#{1,6})\s+(.+)$/.exec(line.trim());
       if (heading) {
-        const tag = heading[1].length === 1 ? "h2" : "h3";
+        const tag = "h" + Math.min(heading[1].length + 1, 6);
         output.push("<" + tag + ">" + inline(heading[2]) + "</" + tag + ">");
         i++; continue;
       }
@@ -42,7 +42,7 @@
       }
       const paragraph = [];
       while (i < lines.length && lines[i].trim()
-        && !/^(#{1,2})\s+/.test(lines[i].trim())
+        && !/^(#{1,6})\s+/.test(lines[i].trim())
         && !/^\s*-\s+/.test(lines[i])) {
         paragraph.push(inline(lines[i]));
         i++;
