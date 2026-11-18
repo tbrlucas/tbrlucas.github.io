@@ -1,6 +1,7 @@
 (() => {
   const config = window.TBRLUCAS_ADMIN_CONFIG || {};
   const apiBase = String(config.apiBase || "").replace(/\/$/, "");
+  const siteBase = new URL("../../", location.href).pathname;
   const $ = (id) => document.getElementById(id);
   const setup = $("admin-setup");
   const login = $("admin-login");
@@ -58,6 +59,9 @@
     $("post-date").value = localDate();
     $("post-published").checked = true;
     $("post-design").value = "default";
+    $("post-cover-image").value = "";
+    $("post-cover-file").value = "";
+    $("post-cover-upload-message").textContent = "";
     $("delete-post-button").hidden = true;
     $("save-post-button").textContent = "Save publication";
     message("");
@@ -71,6 +75,9 @@
     $("post-slug").value = post.slug || "";
     $("post-date").value = post.date || "";
     $("post-excerpt").value = post.excerpt || "";
+    $("post-cover-image").value = post.coverImage || "";
+    $("post-cover-file").value = "";
+    $("post-cover-upload-message").textContent = "";
     $("post-content").value = post.content || "";
     $("post-design").value = ["default","ios-6","android-market-2012","dark-2010s","aero","cydia-classic"].includes(post.design) ? post.design : "default";
     $("post-published").checked = post.published !== false;
@@ -99,7 +106,7 @@
       if (new URLSearchParams(location.search).get("login") === "1") {
         loginMessage(""); show(login, true); show(app, false); return;
       }
-      location.replace("/404.html");
+      location.replace(siteBase + "404.html");
       return;
     }
     let identity;
@@ -112,7 +119,7 @@
         show(login, true); show(app, false);
         loginMessage(error.message);
       } else {
-        location.replace("/404.html");
+        location.replace(siteBase + "404.html");
       }
       return;
     }
@@ -165,6 +172,7 @@
       title: $("post-title").value.trim(),
       date: $("post-date").value,
       excerpt: $("post-excerpt").value.trim(),
+      coverImage: $("post-cover-image").value.trim(),
       content: $("post-content").value.trim(),
       design: $("post-design").value,
       published: $("post-published").checked
@@ -182,6 +190,68 @@
       message("Saved and committed to GitHub.");
     } catch (error) { message(error.message, true); }
     finally { $("save-post-button").disabled = false; }
+  });
+
+
+  $("upload-post-cover").addEventListener("click", async () => {
+    const fileInput = $("post-cover-file");
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) { $("post-cover-upload-message").textContent = "Choose an image first."; return; }
+    if (!/^image\/(jpeg|png|webp|gif)$/i.test(file.type)) { $("post-cover-upload-message").textContent = "Use a JPG, PNG, WebP or GIF image."; return; }
+    if (file.size > 8 * 1024 * 1024) { $("post-cover-upload-message").textContent = "The image is larger than the 8 MB limit."; return; }
+    const slug = $("post-slug").value.trim() || slugify($("post-title").value);
+    if (!slug) { $("post-cover-upload-message").textContent = "Enter the post title first."; return; }
+    const button = $("upload-post-cover");
+    button.disabled = true;
+    $("post-cover-upload-message").textContent = "Preparing a secure image upload…";
+    try {
+      const access = await api("/api/upload-token");
+      const originalName = String(file.name || "cover-image").split(/[\\/]/).pop();
+      const extension = (originalName.match(/\.([a-zA-Z0-9]{2,5})$/) || [,"jpg"])[1].toLowerCase();
+      const safeName = "cover-" + Date.now() + "." + extension;
+      const filePath = "assets/images/blog/" + slug + "/" + safeName;
+      const encodedPath = filePath.split("/").map(encodeURIComponent).join("/");
+      const apiUrl = "https://api.github.com/repos/" + encodeURIComponent(access.owner) + "/" + encodeURIComponent(access.repo) + "/contents/" + encodedPath;
+      const authHeaders = {Authorization:"Bearer " + access.token, Accept:"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28"};
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      let binary = "";
+      for (let offset = 0; offset < bytes.length; offset += 0x4000) binary += String.fromCharCode(...bytes.subarray(offset, Math.min(offset + 0x4000, bytes.length)));
+      const response = await fetch(apiUrl, {method:"PUT",headers:{...authHeaders,"Content-Type":"application/json"},body:JSON.stringify({message:"Upload blog cover image: "+safeName,content:btoa(binary),branch:"main"})});
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "GitHub rejected the upload (" + response.status + ").");
+      $("post-cover-image").value = location.origin + siteBase + encodedPath;
+      $("post-cover-upload-message").textContent = "Image uploaded. Save the publication to apply the cover.";
+    } catch (error) {
+      $("post-cover-upload-message").textContent = "Upload failed: " + error.message;
+    } finally { button.disabled = false; }
+  });
+
+  function insertPostMarkdown(prefix, suffix, placeholder) {
+    const field = $("post-content");
+    const start = field.selectionStart, end = field.selectionEnd;
+    const selected = field.value.slice(start, end) || placeholder;
+    field.setRangeText(prefix + selected + suffix, start, end, "select");
+    field.focus();
+  }
+  $("insert-post-link").addEventListener("click", () => {
+    const url = prompt("Paste the HTTPS link URL:");
+    if (!url) return;
+    if (!/^https:\/\//i.test(url) && !/^\/backupsite\//.test(url)) {
+      $("post-cover-upload-message").textContent = "Use an HTTPS link or a link inside this website.";
+      return;
+    }
+    const label = $("post-content").value.slice($("post-content").selectionStart, $("post-content").selectionEnd) || "link text";
+    insertPostMarkdown("[", "](" + url.trim() + ")", label);
+  });
+  $("insert-post-image").addEventListener("click", () => {
+    const url = prompt("Paste the HTTPS image URL:");
+    if (!url) return;
+    if (!/^https:\/\//i.test(url) && !/^\/backupsite\/assets\/images\//.test(url)) {
+      $("post-cover-upload-message").textContent = "Use an HTTPS image URL or an image uploaded to this website.";
+      return;
+    }
+    const alt = $("post-content").value.slice($("post-content").selectionStart, $("post-content").selectionEnd) || "Image description";
+    insertPostMarkdown("![", "](" + url.trim() + ")", alt);
   });
 
   $("delete-post-button").addEventListener("click", async () => {
@@ -300,7 +370,7 @@
       const response = await fetch(apiUrl, {method:"PUT", headers:{...authHeaders, "Content-Type":"application/json"}, body:payload});
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || "GitHub rejected the upload (" + response.status + ").");
-      const publicUrl = "https://tbrlucas.github.io/" + filePath.split("/").map(encodeURIComponent).join("/");
+      const publicUrl = location.origin + siteBase + filePath.split("/").map(encodeURIComponent).join("/");
       $("download-url").value = publicUrl;
       $("download-size").value = (file.size / (1024 * 1024)).toFixed(1) + " MB";
       $("download-type").value = safeName.includes(".") ? safeName.split(".").pop().toUpperCase() : "FILE";
