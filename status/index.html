@@ -15,8 +15,7 @@ body{background:#f3f6fa;color:#263449}.status-wrap{max-width:880px;margin:100px 
 <script defer>
 (()=>{"use strict";
 const services=[
-{id:"main",name:"Main website",url:"/",config:"/assets/data/maintenance.json"},
-{id:"backup",name:"Backupsite",url:"/",config:"/assets/data/maintenance.json"}
+{id:"main",name:"Main website",url:"/",config:"/assets/data/maintenance.json"}
 ];
 const el=id=>document.getElementById(id);
 async function check(s){
@@ -52,9 +51,8 @@ document.addEventListener("DOMContentLoaded",()=>{refresh();el("refresh").addEve
 </head><body>
 <header class="site-header"><div class="navbar navbar-fixed-top"><div class="navbar-inner"><div class="container"><a class="brand" href="/">tbrlucas</a><ul class="nav"><li><a href="/">Home</a></li><li class="active"><a href="/status/">Status</a></li></ul></div></div></div></header>
 <main class="container status-wrap">
-<section class="status-hero"><div class="kicker">TBRLUCAS NETWORK / LIVE STATUS</div><h1>System status</h1><p>Current availability for both websites.</p><div class="overall" id="overall"><span class="dot"></span><strong id="overall-text">Checking services…</strong></div></section>
+<section class="status-hero"><div class="kicker">TBRLUCAS NETWORK / LIVE STATUS</div><h1>System status</h1><p>Current availability for the TBRLucas website.</p><div class="overall" id="overall"><span class="dot"></span><strong id="overall-text">Checking services…</strong></div></section>
 <section class="service"><div class="service-head"><div><h2>Main website</h2><div class="sub">tbrlucas.github.io</div></div><div class="service-state" id="main"><span class="dot"></span>Checking…</div></div><p class="detail" id="main-detail">Waiting for first check.</p></section>
-<section class="service"><div class="service-head"><div><h2>Backupsite</h2><div class="sub">tbrlucas.github.io/</div></div><div class="service-state" id="backup"><span class="dot"></span>Checking…</div></div><p class="detail" id="backup-detail">Waiting for first check.</p></section>
 <div class="meta"><span id="checked">Last checked: waiting…</span><div class="actions"><button id="refresh" class="btn btn-primary" type="button">Check again</button><a class="btn" href="/">Back to website</a></div></div>
 <p class="foot">Checks run when this page is opened and refresh automatically every 60 seconds. Maintenance status follows each site's maintenance settings.</p>
 </main></body></html>
