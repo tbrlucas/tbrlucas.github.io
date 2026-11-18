@@ -456,6 +456,17 @@
   });
   $("clear-download-button").addEventListener("click", clearDownloadEditor);
 
+  const formattingGuide = "Formatting: # Heading · ## Subheading · **bold** · *italic* · ***bold italic*** · - list item · [link text](https://...) · ![image description](https://...)";
+  ["download-description", "download-notes", "update-details"].forEach(id => {
+    const field = $(id);
+    if (field && !field.parentElement.querySelector(".formatting-help")) {
+      const hint = document.createElement("p");
+      hint.className = "formatting-help";
+      hint.textContent = formattingGuide;
+      field.insertAdjacentElement("afterend", hint);
+    }
+  });
+
   let updates = [];
   const updateMessage = (text, isError = false) => {
     const target = $("update-message");
