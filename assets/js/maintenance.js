@@ -6,7 +6,7 @@
     "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
   }[char]));
 
-  fetch("/assets/data/maintenance.json?v=2", {cache:"no-store"})
+  fetch(new URL("../data/maintenance.json?v=20261115-2", document.currentScript.src), {cache:"no-store"})
     .then(response => {
       if (!response.ok) throw new Error("Maintenance settings unavailable");
       return response.json();
