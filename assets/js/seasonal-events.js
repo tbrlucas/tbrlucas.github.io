@@ -11,7 +11,8 @@ function currentEvent(){
 var eventName=currentEvent();
 var icon=document.querySelector('link[rel~="icon"]');
 if(icon){
- var icons={off:"favicon.svg",xmas:"favicon-xmas.svg",newyear:"favicon-newyear.svg"};
+ var requested=new URLSearchParams(location.search).get("favicon");
+ var icons={off:requested==="gta6"?"favicon-gta6.svg":"favicon.svg",xmas:"favicon-xmas.svg",newyear:"favicon-newyear.svg"};
  icon.href="/assets/images/"+icons[eventName]+"?v=20261118-final";
 }
 var nextMidnight=new Date();nextMidnight.setHours(24,0,0,250);
