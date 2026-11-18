@@ -252,3 +252,7 @@
   .admin-actions .btn { flex: 1 1 auto; }
   .admin-footer { flex-direction: column; }
 }
+
+
+/* Formatting syntax hint shown below publishing fields. */
+.formatting-help{margin:6px 0 14px;color:#687789;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
