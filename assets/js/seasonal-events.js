@@ -9,12 +9,15 @@ function currentEvent(){
  return "off";
 }
 var eventName=currentEvent();
-var nextMidnight=new Date();
-nextMidnight.setHours(24,0,0,250);
+var icon=document.querySelector('link[rel~="icon"]');
+if(icon){
+ var icons={off:"favicon.svg",xmas:"favicon-xmas.svg",newyear:"favicon-newyear.svg"};
+ icon.href="/assets/images/"+icons[eventName]+"?v=20261118-final";
+}
+var nextMidnight=new Date();nextMidnight.setHours(24,0,0,250);
 window.setTimeout(function(){location.reload();},Math.max(1000,nextMidnight.getTime()-Date.now()));
 if(eventName==="off")return;
-var bodyClass=eventName==="xmas"?"seasonal-xmas":"seasonal-newyear";
-document.body.classList.add(bodyClass);
+document.body.classList.add(eventName==="xmas"?"seasonal-xmas":"seasonal-newyear");
 var host=document.createElement("section");host.id="seasonal-event";
 host.setAttribute("aria-label",eventName==="xmas"?"Happy Christmas seasonal event":"Happy New Year seasonal event");
 var title=eventName==="xmas"?"HAPPY XMAS":"HAPPY NEW YEAR";
