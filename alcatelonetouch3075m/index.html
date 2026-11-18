@@ -13,17 +13,16 @@
   if (params.get("login") === "1" || hasOAuthSession || hasStoredSession) {
     document.documentElement.style.visibility = "visible";
   } else {
-    location.replace("/404.html");
+    location.replace("../../404.html");
   }
 })();
 </script>
 <meta name="theme-color" content="#4f7fbf">
-<meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="no-referrer">
 <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap-responsive.min.css">
-<link rel="stylesheet" href="../assets/css/style.css?v=20261115-maintenance">
+<link rel="stylesheet" href="../assets/css/style.css?v=20261118-media-links">
 <title>Administration :: tbrlucas</title>
 </head>
 <body class="admin-page">
@@ -31,9 +30,9 @@
 <header class="site-header">
   <div class="navbar navbar-fixed-top"><div class="navbar-inner"><div class="container">
     <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse" aria-label="Toggle navigation"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
-    <a class="brand" href="/">tbrlucas</a>
+    <a class="brand" href="../../">tbrlucas</a>
     <div class="nav-collapse collapse"><ul class="nav">
-      <li><a href="/">View website</a></li><li class="active"><a href="/alcatelonetouch3075m/">Administration</a></li>
+      <li><a href="../../">View website</a></li><li class="active"><a href="./">Administration</a></li>
     </ul></div>
   </div></div></div>
 </header>
@@ -41,7 +40,7 @@
 <main class="container page admin-page-main" id="main-content">
   <section class="admin-page-heading">
     <div><p class="admin-eyebrow">TBRLUCAS / CONTROL PANEL</p><h1>Administration</h1><p>Manage the content published on your website.</p></div>
-    <a class="btn" href="/" target="_blank" rel="noopener">View website ↗</a>
+    <a class="btn" href="../../" target="_blank" rel="noopener">View website ↗</a>
   </section>
 
   <div id="admin-setup" class="admin-state-panel" role="status">
@@ -93,7 +92,10 @@
             <div class="span5"><label for="post-date">Publication date</label><input class="input-block-level" id="post-date" type="date" required></div>
           </div>
           <label for="post-excerpt">Short description</label><textarea class="input-block-level admin-textarea" id="post-excerpt" maxlength="240" rows="2" placeholder="A short summary for the post list"></textarea>
-          <label for="post-design">Blog theme</label><select class="input-block-level" id="post-design" required><option value="default">Default theme (website CSS)</option><option value="ios-6">iOS 6</option><option value="android-market-2012">Android Market (2012)</option><option value="dark-2010s">Dark 2010s</option><option value="aero">Aero (Windows 7)</option><option value="cydia-classic">Cydia Classic (iOS 6)</option></select><p class="admin-small">The selected theme changes only this article page, not the rest of the website.</p><label for="post-content">Content</label><textarea class="input-block-level admin-content" id="post-content" rows="12" maxlength="50000" required placeholder="Write your post here. Separate paragraphs with a blank line."></textarea><p class="admin-small">Formatting: # Heading · ## Subheading · **bold** · *italic* · ***bold italic*** · - list item</p>
+          <label for="post-design">Blog theme</label><select class="input-block-level" id="post-design" required><option value="default">Default theme (website CSS)</option><option value="ios-6">iOS 6</option><option value="android-market-2012">Android Market (2012)</option><option value="dark-2010s">Dark 2010s</option><option value="aero">Aero (Windows 7)</option><option value="cydia-classic">Cydia Classic (iOS 6)</option></select><p class="admin-small">The selected theme changes only this article page, not the rest of the website.</p>
+          <label for="post-cover-image">Cover image URL</label><input class="input-block-level" id="post-cover-image" type="url" maxlength="2000" placeholder="Upload an image or paste an HTTPS image URL">
+          <div class="admin-upload-box"><div class="admin-upload-controls"><input id="post-cover-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><button class="btn" id="upload-post-cover" type="button">Upload cover image</button></div><p class="admin-small">JPG, PNG, WebP or GIF · Maximum 8 MB. Uploaded images are stored in the website repository.</p><p id="post-cover-upload-message" class="admin-message" role="status" aria-live="polite"></p></div>
+          <label for="post-content">Content</label><div class="admin-format-toolbar"><button class="btn btn-small" id="insert-post-link" type="button">Insert hyperlink</button><button class="btn btn-small" id="insert-post-image" type="button">Insert image</button><span>Markdown supported</span></div><textarea class="input-block-level admin-content" id="post-content" rows="12" maxlength="50000" required placeholder="Write your post here. Separate paragraphs with a blank line."></textarea><p class="admin-small">Formatting: # Heading · ## Subheading · **bold** · *italic* · ***bold italic*** · - list item · [link text](https://...) · ![image description](https://...)</p>
           <label class="admin-publish"><input id="post-published" type="checkbox" checked> Publish this post</label>
           <div class="admin-actions"><button class="btn btn-primary" id="save-post-button" type="submit">Save publication</button><button class="btn" id="cancel-edit-button" type="button">Clear editor</button><button class="btn btn-danger" id="delete-post-button" type="button" hidden>Delete post</button></div>
           <p id="admin-message" class="admin-message" role="status" aria-live="polite"></p>
@@ -190,11 +192,11 @@
     </section>
   </section>
 
-  <footer class="site-footer admin-footer"><ul class="breadcrumb"><li><a href="/">Home</a></li><li class="active">Administration</li></ul><p><strong>tbrlucas</strong> · Private content management</p></footer>
+  <footer class="site-footer admin-footer"><ul class="breadcrumb"><li><a href="../../">Home</a></li><li class="active">Administration</li></ul><p><strong>tbrlucas</strong> · Private content management</p></footer>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
-<script src="../assets/js/admin-config.js?v=20261114-1" defer></script>
-<script src="../assets/js/admin.js?v=20261115-private-route" defer></script>
+<script src="../assets/js/admin-config.js?v=20261115-backup-auth" defer></script>
+<script src="../assets/js/admin.js?v=20261118-media-links" defer></script>
 </body>
 </html>
