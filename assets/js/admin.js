@@ -206,8 +206,9 @@
     $("post-cover-upload-message").textContent = "Preparing a secure image upload…";
     try {
       const access = await api("/api/upload-token");
-      const originalName = String(file.name || "cover-image").split(/[\\/]/).pop();
-      const extension = (originalName.match(/\.([a-zA-Z0-9]{2,5})$/) || [,"jpg"])[1].toLowerCase();
+      const extensionByMime = {"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif"};
+      const extension = extensionByMime[file.type.toLowerCase()];
+      if (!extension) throw new Error("The selected file type is not supported.");
       const safeName = "cover-" + Date.now() + "." + extension;
       const filePath = "assets/images/blog/" + slug + "/" + safeName;
       const encodedPath = filePath.split("/").map(encodeURIComponent).join("/");
