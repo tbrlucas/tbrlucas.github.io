@@ -1,6 +1,17 @@
 {
   "updates": [
     {
+      "id": "20261118-main-site-final-update",
+      "title": "A Major Website Update: Blog, Downloads & Seasonal Design",
+      "date": "2026-11-18",
+      "time": "13:15",
+      "category": "Website",
+      "type": "Major Update",
+      "summary": "The latest Backupsite improvements have been brought into the main tbrlucas website. The blog now supports cover images, inline images and links, the publishing editor has been upgraded, downloads and site pages have been refreshed, and seasonal themes now include matching holiday favicons.",
+      "details": "The Backupsite development has been consolidated into the main tbrlucas website. From now on, the main site is the place for new articles, downloads and future content.\n\nBLOG & PUBLISHING\n- The blog supports cover images, images inside articles and clickable hyperlinks.\n- The administration editor includes image upload and formatting tools for richer posts.\n- Blog cards and article pages display cover images and formatted media.\n- The blog includes search, featured stories, article navigation and multiple visual themes.\n- Available article designs include Default, iOS 6, Android Market (2012), Dark 2010s, Aero and Cydia Classic.\n\nDOWNLOADS & SITE PAGES\n- The Downloads area has been refreshed with its listing and individual download pages.\n- Home, Projects, About, Blog, Status, What’s New and the 404 page have received updates.\n- The administration workflow remains connected to the production publishing service.\n\nSEASONAL EXPERIENCE & IDENTITY\n- Seasonal website themes are scheduled automatically: Happy XMAS (December 1–26) and Happy New Year (December 27–January 2).\n- The website now has four custom SVG favicon designs: the standard TBRLucas icon, a GTA VI-inspired edition, XMAS and New Year.\n- XMAS and New Year favicons switch automatically with their matching seasonal themes.\n\nWHAT’S NEXT\nThe main development phase is being wrapped up. Future updates will focus on publishing new articles and adding downloads.",
+      "published": true
+    },
+    {
       "id": "b8307c89-6b7e-4700-a99b-12273776d196",
       "title": "New apps posted!",
       "date": "2026-11-14",
