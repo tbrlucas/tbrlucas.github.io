@@ -1,6 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-<defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#ff70ad"/><stop offset=".48" stop-color="#ffb17b"/><stop offset="1" stop-color="#3ad2c7"/></linearGradient><linearGradient id="gold" x2="0" y2="1"><stop stop-color="#fff6c9"/><stop offset="1" stop-color="#f4c85d"/></linearGradient></defs>
-<rect width="64" height="64" rx="14" fill="#24172d"/><rect x="4" y="4" width="56" height="56" rx="11" fill="url(#sky)"/>
-<circle cx="32" cy="25" r="14" fill="#ffe0a1" opacity=".9"/><path d="M4 40h56v20H4z" fill="#19364a"/><path d="M4 46h56M4 52h56M18 40l-5 20M32 40v20M46 40l5 20" stroke="#ff78ad" stroke-width="1.2" opacity=".8"/>
-<path d="M13 12h38v8H36v25h-8V20H13z" fill="url(#gold)" stroke="#43213a" stroke-width="1.4" stroke-linejoin="round"/>
+<defs>
+ <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f66ca8"/><stop offset=".48" stop-color="#ffb17b"/><stop offset="1" stop-color="#ffd98a"/></linearGradient>
+ <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#26c7c3"/><stop offset="1" stop-color="#087c91"/></linearGradient>
+ <linearGradient id="type" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff8d9"/><stop offset="1" stop-color="#f7c8a2"/></linearGradient>
+</defs>
+<rect width="64" height="64" rx="14" fill="#251d37"/>
+<rect x="3" y="3" width="58" height="58" rx="12" fill="url(#sky)"/>
+<circle cx="45" cy="19" r="10" fill="#fff0c3" opacity=".88"/>
+<path d="M3 39q13-5 26 0t26 0v19H3z" fill="url(#sea)"/>
+<path d="M3 47h58M3 53h58" stroke="#f9a6b8" stroke-width="1.2" opacity=".75"/>
+<path d="M10 38 14 24l3 14M12 28l-7-5m8 9 8-8m-8 8-6 2" fill="none" stroke="#183b43" stroke-width="2" stroke-linecap="round"/>
+<path d="M8 58V42h6v16M17 58V46h5v12M47 58V43h5v15" fill="#173e50"/>
+<path d="M20 14h24v6H35v20h-7V20H20z" fill="url(#type)" stroke="#6b345a" stroke-width="1.2" stroke-linejoin="round"/>
+<path d="M39 26h8v4h-4v3h4v7h-8v-4h4v-2h-4z" fill="#fff8e8" stroke="#6b345a" stroke-width=".8"/>
 </svg>
