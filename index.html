@@ -83,6 +83,21 @@
   </section>
 
   <hr>
+  <section class="section home-whats-new-section" aria-labelledby="home-whats-new-title">
+    <div class="home-whats-new-heading">
+      <div>
+        <p class="whats-new-kicker">LATEST FROM TBRLUCAS</p>
+        <h2 id="home-whats-new-title">What’s New</h2>
+        <p>See the latest updates, improvements and announcements.</p>
+      </div>
+      <a class="btn" href="/whats-new/">View all updates <span aria-hidden="true">→</span></a>
+    </div>
+    <div id="home-whats-new-list" class="home-whats-new-list" aria-live="polite">
+      <p class="post-empty">Loading latest updates…</p>
+    </div>
+  </section>
+
+  <hr>
   <section class="section" aria-labelledby="devices-title">
     <h2 id="devices-title">Explore older devices</h2>
     <p class="devices-intro">Take a look at some classic devices and discover what you can still do with them.</p>
@@ -192,6 +207,19 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
 <script src="assets/js/main.js?v=20261115-1" defer></script>
 <script src="assets/js/blog.js?v=20261118-media-links" defer></script>
+<script>
+(function(){
+  var target=document.getElementById("home-whats-new-list");
+  if(!target)return;
+  var esc=function(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
+  var formatDate=function(v){var p=String(v||"").split("-").map(Number);return p.length===3?new Intl.DateTimeFormat("en",{year:"numeric",month:"short",day:"numeric",timeZone:"UTC"}).format(new Date(Date.UTC(p[0],p[1]-1,p[2]))):v||"";};
+  fetch("/assets/data/whats-new.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw Error();return r.json();}).then(function(data){
+    var updates=(Array.isArray(data.updates)?data.updates:[]).filter(function(x){return x&&x.published===true;}).sort(function(a,b){return (String(b.date)+String(b.time||"")).localeCompare(String(a.date)+String(a.time||""));}).slice(0,3);
+    if(!updates.length){target.innerHTML='<p class="post-empty">No updates yet. Check back soon!</p>';return;}
+    target.innerHTML=updates.map(function(item){return '<article class="home-whats-new-item"><div class="home-whats-new-meta"><time datetime="'+esc(item.date)+'">'+esc(formatDate(item.date))+'</time><span>'+esc(item.category||"Update")+'</span></div><h3>'+esc(item.title)+'</h3><p>'+esc(item.summary)+'</p><a href="/whats-new/post.html?id='+encodeURIComponent(item.id)+'">Read update <span aria-hidden="true">→</span></a></article>';}).join("");
+  }).catch(function(){target.innerHTML='<p class="post-empty">Latest updates are temporarily unavailable.</p>';});
+})();
+</script>
 <script>
 window.gtranslateSettings = {
   "default_language": "en",
