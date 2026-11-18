@@ -13,7 +13,7 @@ var icon=document.querySelector('link[rel~="icon"]');
 if(icon){
  var requested=new URLSearchParams(location.search).get("favicon");
  var icons={off:requested==="gta6"?"favicon-gta6.svg":"favicon.svg",xmas:"favicon-xmas.svg",newyear:"favicon-newyear.svg"};
- icon.href="/assets/images/"+icons[eventName]+"?v=20261118-final";
+ icon.href="/assets/images/"+icons[eventName]+"?v=20261118-rebuilt-v2";
 }
 var nextMidnight=new Date();nextMidnight.setHours(24,0,0,250);
 window.setTimeout(function(){location.reload();},Math.max(1000,nextMidnight.getTime()-Date.now()));
