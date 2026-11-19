@@ -45,7 +45,7 @@ The example `wrangler.toml.example` contains the non-secret variable template. C
 2. Bind KV as `AUTH_KV`, set the variables, and add both encrypted secrets.
 3. In GitHub App settings, make sure the callback URL exactly matches `GITHUB_CALLBACK_URL`.
 4. Set `apiBase` in `assets/js/admin-config.js` to the Worker origin, without a trailing slash.
-5. Save that front-end config file in the private repository.
+5. Save that front-end config file in the website repository. The configured Worker URL is an endpoint address, not a credential; never put secrets or access tokens in the public frontend.
 
 ## Security notes
 
