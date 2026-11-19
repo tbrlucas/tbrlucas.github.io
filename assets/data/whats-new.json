@@ -1,17 +1,6 @@
 {
   "updates": [
     {
-      "id": "20261118-security-review",
-      "title": "TBRLucas Security & Reliability Review",
-      "date": "2026-11-18",
-      "time": "14:27",
-      "category": "Security",
-      "type": "Security Check",
-      "summary": "Routine security and reliability review completed. Two low-severity issues were corrected; no Critical, High or Medium findings were identified in the reviewed scope.",
-      "details": "## Review scope\nReviewed the public-site source, page scripts, content publishing and administration flow, image upload handling, Worker authentication/session/CORS design, public JSON data, and recent GitHub Pages deployment records. The live pages could not be independently fetched through the available page checker, so deployment verification is based on GitHub Actions.\n\n## Findings and corrections\n\n### Low — image upload file extensions\nThe blog cover uploader previously derived the stored file extension from the original filename, even though it separately checked the image MIME type. It now chooses the extension from the accepted image type (JPEG, PNG, WebP or GIF). This prevents misleading filename extensions from determining how uploaded files are served.\n\n### Low — duplicated status entry\nThe Status page showed both the main site and Backupsite, although both checks targeted the same main-site address and maintenance settings. It now reports only the main website, avoiding a duplicated and misleading status.\n\n## Remaining hardening note\nThe authenticated administration upload flow still has a credential-handling design that would benefit from moving the upload operation fully server-side. No change was made because that requires a Cloudflare Worker deployment and end-to-end testing. The current review did not identify evidence of credential exposure to unauthenticated visitors.\n\n## Result\nNo Critical, High or Medium findings were identified in the files reviewed. This was a focused maintenance review, not a comprehensive penetration test or a guarantee of security.",
-      "published": true
-    },
-    {
       "id": "b8307c89-6b7e-4700-a99b-12273776d196",
       "title": "New apps posted!",
       "date": "2026-11-14",
