@@ -517,7 +517,7 @@
     renderUpdates();
   }
   function showAdminSection(section) {
-    ["posts","downloads","whats-new","maintenance"].forEach(name => {
+    ["posts","downloads","whats-new","maintenance","maintenance-reports"].forEach(name => {
       show($("admin-" + name + "-section"), name === section);
       const button = $("show-" + name + "-tab");
       if (button) button.classList.toggle("btn-primary", name === section);
@@ -528,7 +528,77 @@
     if (section === "whats-new" && !$("admin-update-list").dataset.loaded) {
       loadUpdates().then(() => $("admin-update-list").dataset.loaded = "1").catch(error => updateMessage(error.message, true));
     }
+    if (section === "maintenance-reports" && !$("maintenance-report-list").dataset.loaded) {
+      loadMaintenanceReports().then(() => $("maintenance-report-list").dataset.loaded = "1").catch(error => maintenanceReportMessage(error.message, true));
+    }
   }
+
+  let maintenanceReports = [];
+  const maintenanceReportMessage = (text, isError = false) => {
+    const target = $("maintenance-report-message");
+    if (!target) return;
+    target.textContent = text;
+    target.className = isError ? "admin-message error" : "admin-message";
+  };
+  function renderMaintenanceReports() {
+    const target = $("maintenance-report-list");
+    if (!target) return;
+    const sorted = maintenanceReports.slice().sort((a,b) => String(b.date).localeCompare(String(a.date)) || String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+    $("maintenance-report-count").textContent = sorted.length + (sorted.length === 1 ? " saved report" : " saved reports");
+    if (!sorted.length) {
+      target.innerHTML = '<p class="post-empty">No maintenance reports have been recorded yet.</p>';
+      return;
+    }
+    target.innerHTML = sorted.map(report => {
+      const severity = String(report.severity || "Informational");
+      const safeSeverity = ["Critical","High","Medium","Low","Informational"].includes(severity) ? severity : "Informational";
+      return '<article class="maintenance-report-card">' +
+        '<div class="maintenance-report-card-head"><div><p class="admin-eyebrow">' + escapeHtml(report.date) + '</p><h4>' + escapeHtml(report.title) + '</h4></div><span class="maintenance-severity severity-' + safeSeverity.toLowerCase() + '">' + safeSeverity + '</span></div>' +
+        '<p class="maintenance-report-summary">' + escapeHtml(report.summary) + '</p>' +
+        '<details><summary>View full report</summary>' +
+        '<h5>Scope checked</h5><p>' + escapeHtml(report.scope || "Not recorded").replace(/\n/g,"<br>") + '</p>' +
+        '<h5>Findings</h5><p>' + escapeHtml(report.findings || "None recorded").replace(/\n/g,"<br>") + '</p>' +
+        '<h5>Corrections / actions</h5><p>' + escapeHtml(report.actions || "None recorded").replace(/\n/g,"<br>") + '</p>' +
+        '<h5>Verification and deployment</h5><p>' + escapeHtml(report.verification || "Not recorded").replace(/\n/g,"<br>") + '</p>' +
+        '<h5>Benefits</h5><p>' + escapeHtml(report.benefits || "Not recorded").replace(/\n/g,"<br>") + '</p></details></article>';
+    }).join("");
+  }
+  async function loadMaintenanceReports() {
+    maintenanceReportMessage("Loading private report history…");
+    const data = await api("/api/maintenance-reports");
+    maintenanceReports = Array.isArray(data.reports) ? data.reports : [];
+    renderMaintenanceReports();
+    maintenanceReportMessage("Private maintenance history loaded.");
+  }
+  $("report-date").value = localDate();
+  $("maintenance-report-editor").addEventListener("submit", async event => {
+    event.preventDefault();
+    const report = {
+      title: $("report-title").value.trim(),
+      date: $("report-date").value,
+      severity: $("report-severity").value,
+      scope: $("report-scope").value.trim(),
+      findings: $("report-findings").value.trim(),
+      actions: $("report-actions").value.trim(),
+      verification: $("report-verification").value.trim(),
+      benefits: $("report-benefits").value.trim(),
+      summary: $("report-summary").value.trim()
+    };
+    try {
+      $("save-maintenance-report-button").disabled = true;
+      maintenanceReportMessage("Saving report to the private administrative store…");
+      const data = await api("/api/maintenance-reports", {method:"POST", body:JSON.stringify({action:"save", report})});
+      maintenanceReports = Array.isArray(data.reports) ? data.reports : [];
+      renderMaintenanceReports();
+      $("maintenance-report-editor").reset();
+      $("report-date").value = localDate();
+      maintenanceReportMessage("Report saved. It is visible only through an authenticated admin session.");
+    } catch (error) {
+      maintenanceReportMessage("Could not save report: " + error.message, true);
+    } finally {
+      $("save-maintenance-report-button").disabled = false;
+    }
+  });
 
   let maintenanceSettings = {enabled:false, eta:"", reason:""};
   const maintenanceMessage = (text, isError = false) => {
@@ -602,6 +672,7 @@
   $("show-downloads-tab").addEventListener("click", () => showAdminSection("downloads"));
   $("show-whats-new-tab").addEventListener("click", () => showAdminSection("whats-new"));
   $("show-maintenance-tab").addEventListener("click", () => showAdminSection("maintenance"));
+  $("show-maintenance-reports-tab").addEventListener("click", () => showAdminSection("maintenance-reports"));
   $("new-update-button").addEventListener("click", clearUpdateEditor);
   $("clear-update-button").addEventListener("click", clearUpdateEditor);
   $("update-editor").addEventListener("submit", async event => {
