@@ -49,8 +49,9 @@ The example `wrangler.toml.example` contains the non-secret variable template. C
 
 ## Security notes
 
-- The browser never receives the GitHub App private key, app installation token, or OAuth client secret.
+- The browser does not receive the GitHub App private key or OAuth client secret.
+- The authenticated `/api/upload-token` endpoint currently returns a short-lived GitHub App installation token to the admin browser for direct file and maintenance-settings uploads. Treat that token as sensitive while it is in the browser; avoid adding untrusted third-party scripts to the admin page.
 - The Worker verifies OAuth state, checks the allowed GitHub login, checks the exact Origin, and uses short-lived sessions.
-- The installation token is limited by GitHub to the repositories selected during installation and the app's granted permissions.
+- The installation token's repository scope follows the GitHub App installation and its granted permissions. Install the app on only the intended repository and grant only the permissions it needs.
 - Do not enable sign-in until the GitHub App is installed only on the intended repository and its permissions have been reviewed.
 - The static admin page URL is not itself secret; every API action requires a valid authorized session.
