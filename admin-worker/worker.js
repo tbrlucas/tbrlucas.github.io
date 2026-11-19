@@ -182,6 +182,57 @@ export default {
         return json({token, expiresIn:3300, owner:env.REPO_OWNER, repo:env.REPO_NAME},200,origin);
       }
       if (url.pathname === "/api/logout" && request.method === "POST") { await env.AUTH_KV.delete("session:" + session.id); return json({ok:true},200,origin); }
+const INITIAL_MAINTENANCE_REPORTS = [{
+  id:"maintenance-2026-11-18",
+  title:"TBRLucas Security & Reliability Review",
+  date:"2026-11-18",
+  severity:"Low",
+  summary:"Routine review completed. Two low-severity issues were corrected; no Critical, High or Medium findings were identified in the reviewed scope.",
+  scope:"Reviewed public-site source, page scripts, content publishing and administration flow, image upload handling, Worker authentication/session/CORS design, public JSON data, and recent GitHub Pages deployment records. Live pages could not be independently fetched through the available page checker.",
+  findings:"Low — blog cover uploads derived the stored extension from the original filename instead of the accepted MIME type.\nLow — the Status page duplicated the main-site check as Backupsite, although both checks targeted the same main-site address.",
+  actions:"Changed blog cover upload extension selection to derive from the accepted image MIME type. Removed the duplicated Backupsite status entry. A further hardening opportunity remains: moving upload operations fully server-side requires separate deployment and end-to-end testing.",
+  verification:"The source changes were committed to main. Deployment status was not independently confirmed in the historical report. No Critical, High or Medium findings were identified in the reviewed files.",
+  benefits:"More reliable image file handling and clearer status reporting.",
+  createdAt:"2026-11-18T14:27:00-03:00"
+}];
+async function readMaintenanceReports(env) {
+  const key = "maintenance:reports";
+  const stored = await env.AUTH_KV.get(key);
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  }
+  await env.AUTH_KV.put(key, JSON.stringify(INITIAL_MAINTENANCE_REPORTS));
+  return INITIAL_MAINTENANCE_REPORTS;
+}
+function validMaintenanceReport(report) {
+  if (!report || typeof report !== "object") return false;
+  const limits = {title:140,scope:4000,findings:8000,actions:8000,verification:4000,benefits:2000,summary:3000};
+  if (!["Critical","High","Medium","Low","Informational"].includes(report.severity)) return false;
+  if (typeof report.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(report.date)) return false;
+  const date = new Date(report.date + "T00:00:00Z");
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0,10) !== report.date) return false;
+  return Object.entries(limits).every(([key,max]) => typeof report[key] === "string" && report[key].length <= max)
+    && report.title.trim().length > 0 && report.scope.trim().length > 0
+    && report.verification.trim().length > 0 && report.summary.trim().length > 0;
+}
+
+      if (url.pathname === "/api/maintenance-reports" && (request.method === "GET" || request.method === "POST")) {
+        if (request.method === "GET") {
+          const reports = await readMaintenanceReports(env);
+          return json({reports},200,origin);
+        }
+        const input = await request.json();
+        if (input.action !== "save" || !validMaintenanceReport(input.report)) {
+          return json({error:"Check the report title, date, severity, scope, verification and summary."},400,origin);
+        }
+        const reports = await readMaintenanceReports(env);
+        if (reports.length >= 1000) return json({error:"The maintenance report history has reached its 1,000-entry limit."},400,origin);
+        const report = {...input.report, id:"maintenance-" + randomToken(12), createdAt:new Date().toISOString()};
+        reports.push(report);
+        await env.AUTH_KV.put("maintenance:reports",JSON.stringify(reports));
+        return json({reports},200,origin);
+      }
       if (url.pathname === "/api/posts" && (request.method === "GET" || request.method === "POST")) {
         const token = await installationToken(env);
         if (request.method === "GET") { const result = await readPosts(env,token); return json({posts:result.posts.posts || []},200,origin); }
