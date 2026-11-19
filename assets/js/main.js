@@ -18,7 +18,9 @@
   if (window.jQuery && window.jQuery.fn.carousel) {
     const $carousel = window.jQuery("#deviceCarousel");
     if ($carousel.length) {
-      $carousel.carousel({ interval: 6500, pause: "hover" });
+      const reduceMotion = window.matchMedia
+        && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      $carousel.carousel({ interval: reduceMotion ? false : 6500, pause: "hover" });
     }
   }
 })();
