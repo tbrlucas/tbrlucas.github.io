@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /alcatelonetouch3075m/
 
 Sitemap: https://tbrlucas.github.io/sitemap.xml
