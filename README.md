@@ -61,13 +61,11 @@ Some sections use JSON files to keep content separate from page markup.
 
 Content entries generally include a title, URL slug, description, and publication status. Entries marked as unpublished are intended to remain out of the public-facing listings.
 
-## Website deletion procedure
+## Administration
 
-The `/alcatelonetouch3075m/` page is a restricted administrative test interface used to validate the website termination confirmation process.
+The `/alcatelonetouch3075m/` route contains the site's content-management panel for blog posts, downloads, What's New entries, and maintenance settings.
 
-The page presents a final confirmation prompt before proceeding with the permanent deletion of the TBRLucas website. Selecting **YES** is designated as the confirmation action for this operation.
-
-This interface is isolated from the public website and is not part of the regular content-management workflow.
+The page is publicly hosted as a static interface, but administrative operations require GitHub authentication and server-side authorization through the Cloudflare Worker. The route itself is not a security boundary, and its address must not be treated as a secret.
 
 ## Administration
 
