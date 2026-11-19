@@ -71,6 +71,7 @@
       <button type="button" class="btn" id="show-downloads-tab">Downloads library</button>
       <button type="button" class="btn" id="show-whats-new-tab">What’s New</button>
       <button type="button" class="btn" id="show-maintenance-tab">Maintenance</button>
+      <button type="button" class="btn" id="show-maintenance-reports-tab">Maintenance Report</button>
     </nav>
 
     <section id="admin-posts-section" class="admin-workspace">
@@ -125,6 +126,30 @@
         <p><strong>Estimated time for the end of maintenance:</strong> <span id="maintenance-preview-eta">Not specified</span></p>
         <p><strong>Reason:</strong> <span id="maintenance-preview-reason">Not specified</span></p>
       </div>
+    </section>
+
+    <section id="admin-maintenance-reports-section" class="admin-workspace" hidden>
+      <div class="admin-section-heading">
+        <div><p class="admin-eyebrow">PRIVATE ADMINISTRATIVE LOG</p><h3>Maintenance Report</h3><p>Internal history of completed maintenance and security reviews. These reports are not published on the public website.</p></div>
+      </div>
+      <div class="maintenance-report-intro"><strong id="maintenance-report-count">Loading report history…</strong><span>Newest reviews appear first.</span></div>
+      <div id="maintenance-report-list" class="maintenance-report-list"><p class="post-empty">Loading maintenance reports…</p></div>
+      <form id="maintenance-report-editor" class="admin-editor-panel maintenance-report-editor">
+        <div class="admin-panel-heading"><strong>Add completed maintenance report</strong><span>Private admin history</span></div>
+        <label for="report-title">Report title</label><input class="input-block-level" id="report-title" maxlength="140" required placeholder="e.g. TBRLucas maintenance review">
+        <div class="row-fluid">
+          <div class="span6"><label for="report-date">Review date</label><input class="input-block-level" id="report-date" type="date" required></div>
+          <div class="span6"><label for="report-severity">Overall severity</label><select class="input-block-level" id="report-severity"><option>Informational</option><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></div>
+        </div>
+        <label for="report-scope">Scope checked</label><textarea class="input-block-level admin-textarea" id="report-scope" rows="3" maxlength="4000" required placeholder="Pages, routes, services and systems actually reviewed"></textarea>
+        <label for="report-findings">Findings</label><textarea class="input-block-level admin-textarea" id="report-findings" rows="4" maxlength="8000" placeholder="Findings with severity, evidence and impact; write “None identified” when applicable"></textarea>
+        <label for="report-actions">Corrections / actions</label><textarea class="input-block-level admin-textarea" id="report-actions" rows="4" maxlength="8000" placeholder="What was fixed, or explicitly state that no changes were needed"></textarea>
+        <label for="report-verification">Verification and deployment</label><textarea class="input-block-level admin-textarea" id="report-verification" rows="3" maxlength="4000" required placeholder="What was verified and whether deployment was confirmed"></textarea>
+        <label for="report-benefits">Benefits</label><textarea class="input-block-level admin-textarea" id="report-benefits" rows="2" maxlength="2000" placeholder="Resulting improvements"></textarea>
+        <label for="report-summary">Overall summary</label><textarea class="input-block-level admin-textarea" id="report-summary" rows="3" maxlength="3000" required placeholder="Short maintenance outcome"></textarea>
+        <div class="admin-actions"><button class="btn btn-primary" id="save-maintenance-report-button" type="submit">Save private report</button></div>
+        <p id="maintenance-report-message" class="admin-message" role="status" aria-live="polite"></p>
+      </form>
     </section>
 
     <section id="admin-whats-new-section" class="admin-workspace" hidden>
