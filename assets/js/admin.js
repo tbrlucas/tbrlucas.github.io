@@ -201,6 +201,7 @@
     if (file.size > 8 * 1024 * 1024) { $("post-cover-upload-message").textContent = "The image is larger than the 8 MB limit."; return; }
     const slug = $("post-slug").value.trim() || slugify($("post-title").value);
     if (!slug) { $("post-cover-upload-message").textContent = "Enter the post title first."; return; }
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) { $("post-cover-upload-message").textContent = "Use a valid URL slug with lowercase letters, numbers and hyphens."; return; }
     const button = $("upload-post-cover");
     button.disabled = true;
     $("post-cover-upload-message").textContent = "Preparing a secure image upload…";
@@ -326,8 +327,10 @@
     const file = fileInput.files && fileInput.files[0];
     if (!file) { $("download-upload-message").textContent = "Choose a file first."; return; }
     if (file.size > 100 * 1024 * 1024) { $("download-upload-message").textContent = "This file is larger than the 100 MB limit."; return; }
+    if (!/\.(ipa|apk|zip|deb|dylib|exe|msi|7z|tar|gz|pdf)$/i.test(String(file.name || ""))) { $("download-upload-message").textContent = "Choose one of the supported file types shown above."; return; }
     const slug = $("download-slug").value.trim() || slugify($("download-title").value);
     if (!slug) { $("download-upload-message").textContent = "Enter the application name first."; return; }
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) { $("download-upload-message").textContent = "Use a valid URL slug with lowercase letters, numbers and hyphens."; return; }
     $("download-upload-message").textContent = "Preparing a secure GitHub upload…";
     $("upload-download-file").disabled = true;
     try {
