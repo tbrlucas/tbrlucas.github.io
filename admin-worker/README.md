@@ -8,9 +8,9 @@ This folder contains the Cloudflare Worker API used by the static content panel 
 - GitHub App repository permission: **Contents — Read and write**. Do not grant administration, issues, pull requests, or access to other repositories.
 - The GitHub App user-authorization flow identifies the administrator. The Worker checks the exact login in `ADMIN_GITHUB_LOGIN`.
 - The Worker creates short-lived opaque browser sessions in Cloudflare KV.
-- For repository operations, the Worker creates a short-lived installation token limited to the installed repository and Contents permission.
+- For repository operations, the Worker creates a short-lived installation token scoped to the single configured repository and Contents permission. The token stays inside the Worker and is never returned to the browser.
 - Blog posts are stored in `assets/data/posts.json` on branch `main`.
-- Download entries are stored in `assets/data/downloads.json` on branch `main`; the actual files are hosted at their HTTPS URLs.
+- Download entries are stored in `assets/data/downloads.json` on branch `main`; uploaded files are committed under `downloads/files/` on branch `main`.
 
 ## Required setup
 
@@ -41,17 +41,18 @@ The example `wrangler.toml.example` contains the non-secret variable template. C
 
 ## Deploy and connect
 
-1. Deploy `worker.js` to Cloudflare.
+1. Deploy the updated `worker.js` to Cloudflare before publishing the updated admin frontend; the frontend now calls the server-side upload and maintenance routes.
 2. Bind KV as `AUTH_KV`, set the variables, and add both encrypted secrets.
 3. In GitHub App settings, make sure the callback URL exactly matches `GITHUB_CALLBACK_URL`.
 4. Set `apiBase` in `assets/js/admin-config.js` to the Worker origin, without a trailing slash.
-5. Save that front-end config file in the website repository. The configured Worker URL is an endpoint address, not a credential; never put secrets or access tokens in the public frontend.
+5. Save the updated front-end files in the website repository. The configured Worker URL is an endpoint address, not a credential; never put secrets or access tokens in the public frontend.
 
 ## Security notes
 
 - The browser does not receive the GitHub App private key or OAuth client secret.
-- The authenticated `/api/upload-token` endpoint currently returns a short-lived GitHub App installation token to the admin browser for direct file and maintenance-settings uploads. Treat that token as sensitive while it is in the browser; avoid adding untrusted third-party scripts to the admin page.
+- No endpoint returns a GitHub installation token to the browser. Blog-cover uploads, download-file uploads, and maintenance-settings changes are performed by the Worker after it validates the authenticated session.
+- Blog-cover uploads are limited to 8 MB. Download uploads are limited to 20 MB to keep server-side encoding within Worker memory limits.
 - The Worker verifies OAuth state, checks the allowed GitHub login, checks the exact Origin, and uses short-lived sessions.
-- The installation token's repository scope follows the GitHub App installation and its granted permissions. Install the app on only the intended repository and grant only the permissions it needs.
+- The installation token request explicitly scopes the token to `REPO_NAME` and Contents write permission. Keep the GitHub App installed only on the intended repository and grant only the permissions it needs.
 - Do not enable sign-in until the GitHub App is installed only on the intended repository and its permissions have been reviewed.
 - The static admin page URL is not itself secret; every API action requires a valid authorized session.
