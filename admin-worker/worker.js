@@ -27,8 +27,8 @@ function bytesToBase64(bytes) {
   for (let offset = 0; offset < bytes.length; offset += 0x6000) {
     const chunk = bytes.subarray(offset, Math.min(offset + 0x6000, bytes.length));
     let binary = "";
-    for (let index = 0; index < chunk.length; index += 0x4000) {
-      binary += String.fromCharCode(...chunk.subarray(index, Math.min(index + 0x4000, chunk.length)));
+    for (let index = 0; index < chunk.length; index += 0x3fff) {
+      binary += String.fromCharCode(...chunk.subarray(index, Math.min(index + 0x3fff, chunk.length)));
     }
     encoded += btoa(binary);
   }
