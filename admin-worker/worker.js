@@ -23,11 +23,16 @@ function utf8ToBase64(value) {
   bytes.forEach(byte => binary += String.fromCharCode(byte)); return btoa(binary);
 }
 function bytesToBase64(bytes) {
-  let binary = "";
+  let encoded = "";
   for (let offset = 0; offset < bytes.length; offset += 0x6000) {
-    binary += String.fromCharCode(...bytes.subarray(offset, Math.min(offset + 0x6000, bytes.length)));
+    const chunk = bytes.subarray(offset, Math.min(offset + 0x6000, bytes.length));
+    let binary = "";
+    for (let index = 0; index < chunk.length; index += 0x4000) {
+      binary += String.fromCharCode(...chunk.subarray(index, Math.min(index + 0x4000, chunk.length)));
+    }
+    encoded += btoa(binary);
   }
-  return btoa(binary);
+  return encoded;
 }
 function repoContentsPath(env, filePath, ref = false) {
   const encoded = filePath.split("/").map(encodeURIComponent).join("/");
