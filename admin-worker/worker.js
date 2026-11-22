@@ -48,8 +48,9 @@ async function writeBinaryFile(env, token, filePath, bytes, message) {
   })});
 }
 function safeUploadName(value) {
-  return String(value || "download.bin").split(/[\\\\/]/).pop().normalize("NFKD")
-    .replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-zA-Z0-9._-]+/g,"-")
+  const raw = String(value || "download.bin");
+  const base = raw.slice(Math.max(raw.lastIndexOf("/"),raw.lastIndexOf("\\\\")) + 1);
+  return base.normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g,"-")
     .replace(/^-+|-+$/g,"").slice(0,120) || "download.bin";
 }
 function b64url(bytes) {
@@ -137,6 +138,11 @@ async function appJwt(env) {
 async function installationToken(env) {
   const cached = await env.AUTH_KV.get("github:installation-token:v2");
   if (cached) return cached;
+  const legacyToken = await env.AUTH_KV.get("github:installation-token");
+  if (legacyToken) {
+    try { await githubRequest("/installation/token",legacyToken,{method:"DELETE"}); } catch (_) {}
+    await env.AUTH_KV.delete("github:installation-token");
+  }
   const jwt = await appJwt(env);
   const result = await githubRequest("/app/installations/" + env.GITHUB_APP_INSTALLATION_ID + "/access_tokens", jwt, {
     method:"POST", headers:{"Content-Type":"application/json"},
