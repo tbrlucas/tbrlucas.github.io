@@ -49,7 +49,7 @@ async function writeBinaryFile(env, token, filePath, bytes, message) {
 }
 function safeUploadName(value) {
   const raw = String(value || "download.bin");
-  const base = raw.slice(Math.max(raw.lastIndexOf("/"),raw.lastIndexOf("\\\\")) + 1);
+  const base = raw.slice(Math.max(raw.lastIndexOf("/"),raw.lastIndexOf(String.fromCharCode(92))) + 1);
   return base.normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g,"-")
     .replace(/^-+|-+$/g,"").slice(0,120) || "download.bin";
 }
