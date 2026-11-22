@@ -22,6 +22,42 @@ function utf8ToBase64(value) {
   const bytes = new TextEncoder().encode(value); let binary = "";
   bytes.forEach(byte => binary += String.fromCharCode(byte)); return btoa(binary);
 }
+function bytesToBase64(bytes) {
+  let encoded = "";
+  for (let offset = 0; offset < bytes.length; offset += 0x6000) {
+    const chunk = bytes.subarray(offset, Math.min(offset + 0x6000, bytes.length));
+    let binary = "";
+    for (let index = 0; index < chunk.length; index += 0x3fff) {
+      binary += String.fromCharCode(...chunk.subarray(index, Math.min(index + 0x3fff, chunk.length)));
+    }
+    encoded += btoa(binary);
+  }
+  return encoded;
+}
+function repoContentsPath(env, filePath, ref = false) {
+  const encoded = filePath.split("/").map(encodeURIComponent).join("/");
+  return "/repos/" + encodeURIComponent(env.REPO_OWNER) + "/" + encodeURIComponent(env.REPO_NAME)
+    + "/contents/" + encoded + (ref ? "?ref=main" : "");
+}
+async function writeBinaryFile(env, token, filePath, bytes, message) {
+  const path = repoContentsPath(env, filePath);
+  let existingSha = "";
+  try {
+    const existing = await githubRequest(path + "?ref=main", token);
+    existingSha = existing.sha || "";
+  } catch (error) {
+    if (!/not found/i.test(error.message || "")) throw error;
+  }
+  return githubRequest(path, token, {method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    message, content:bytesToBase64(bytes), branch:"main", ...(existingSha ? {sha:existingSha} : {})
+  })});
+}
+function safeUploadName(value) {
+  const raw = String(value || "download.bin");
+  const base = raw.slice(Math.max(raw.lastIndexOf("/"),raw.lastIndexOf(String.fromCharCode(92))) + 1);
+  return base.normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g,"-")
+    .replace(/^-+|-+$/g,"").slice(0,120) || "download.bin";
+}
 function b64url(bytes) {
   let binary = ""; bytes.forEach(byte => binary += String.fromCharCode(byte));
   return btoa(binary).replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_");
@@ -105,14 +141,20 @@ async function appJwt(env) {
   return unsigned + "." + b64url(new Uint8Array(signature));
 }
 async function installationToken(env) {
-  const cached = await env.AUTH_KV.get("github:installation-token");
+  const cached = await env.AUTH_KV.get("github:installation-token:v2");
   if (cached) return cached;
+  const legacyToken = await env.AUTH_KV.get("github:installation-token");
+  if (legacyToken) {
+    try { await githubRequest("/installation/token",legacyToken,{method:"DELETE"}); } catch (_) {}
+    await env.AUTH_KV.delete("github:installation-token");
+  }
   const jwt = await appJwt(env);
   const result = await githubRequest("/app/installations/" + env.GITHUB_APP_INSTALLATION_ID + "/access_tokens", jwt, {
-    method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({permissions:{contents:"write"}})
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({repositories:[env.REPO_NAME],permissions:{contents:"write"}})
   });
   if (!result.token) throw new Error("Could not obtain a repository installation token.");
-  await env.AUTH_KV.put("github:installation-token", result.token, {expirationTtl:3300});
+  await env.AUTH_KV.put("github:installation-token:v2", result.token, {expirationTtl:3300});
   return result.token;
 }
 async function getSession(request, env) {
@@ -177,11 +219,60 @@ export default {
       const session = await getSession(request,env);
       if (!session) return json({error:"Please sign in again."},401,origin);
       if (url.pathname === "/api/session" && request.method === "GET") return json({login:session.login},200,origin);
-      if (url.pathname === "/api/upload-token" && request.method === "GET") {
-        const token = await installationToken(env);
-        return json({token, expiresIn:3300, owner:env.REPO_OWNER, repo:env.REPO_NAME},200,origin);
-      }
       if (url.pathname === "/api/logout" && request.method === "POST") { await env.AUTH_KV.delete("session:" + session.id); return json({ok:true},200,origin); }
+      if (url.pathname === "/api/maintenance" && (request.method === "GET" || request.method === "POST")) {
+        const token = await installationToken(env);
+        const filePath = "assets/data/maintenance.json";
+        const current = await githubRequest(repoContentsPath(env,filePath,true),token);
+        if (request.method === "GET") {
+          return json({settings:JSON.parse(base64ToUtf8(current.content))},200,origin);
+        }
+        const settings = await request.json();
+        if (!settings || typeof settings.enabled !== "boolean"
+          || typeof settings.eta !== "string" || settings.eta.length > 120
+          || typeof settings.reason !== "string" || settings.reason.length > 1000) {
+          return json({error:"Check the maintenance settings and their field lengths."},400,origin);
+        }
+        await githubRequest(repoContentsPath(env,filePath),token,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+          message:"Update website maintenance settings",
+          content:utf8ToBase64(JSON.stringify(settings,null,2) + "\n"),
+          branch:"main",sha:current.sha
+        })});
+        return json({settings},200,origin);
+      }
+      if (url.pathname === "/api/upload/blog-cover" && request.method === "POST") {
+        const slug = url.searchParams.get("slug") || "";
+        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return json({error:"A valid blog slug is required."},400,origin);
+        const mime = (request.headers.get("Content-Type") || "").split(";")[0].trim().toLowerCase();
+        const extensions = {"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif"};
+        if (!extensions[mime]) return json({error:"Use a JPG, PNG, WebP or GIF image."},415,origin);
+        const declaredSize = Number(request.headers.get("Content-Length") || 0);
+        if (declaredSize > 8 * 1024 * 1024) return json({error:"The image is larger than the 8 MB limit."},413,origin);
+        const bytes = new Uint8Array(await request.arrayBuffer());
+        if (!bytes.length || bytes.length > 8 * 1024 * 1024) return json({error:"The image must be between 1 byte and 8 MB."},413,origin);
+        const filename = "cover-" + Date.now() + "-" + randomToken(4) + "." + extensions[mime];
+        const filePath = "assets/images/blog/" + slug + "/" + filename;
+        const token = await installationToken(env);
+        await writeBinaryFile(env,token,filePath,bytes,"Upload blog cover image: " + filename);
+        return json({path:filePath,filename},201,origin);
+      }
+      if (url.pathname === "/api/upload/download" && request.method === "POST") {
+        const slug = url.searchParams.get("slug") || "";
+        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return json({error:"A valid download slug is required."},400,origin);
+        const filename = safeUploadName(url.searchParams.get("filename"));
+        const extension = filename.includes(".") ? filename.split(".").pop().toLowerCase() : "";
+        if (!["ipa","apk","zip","deb","dylib","exe","msi","7z","tar","gz","pdf"].includes(extension)) {
+          return json({error:"This file type is not supported."},415,origin);
+        }
+        const declaredSize = Number(request.headers.get("Content-Length") || 0);
+        if (declaredSize > 20 * 1024 * 1024) return json({error:"The file is larger than the 20 MB limit."},413,origin);
+        const bytes = new Uint8Array(await request.arrayBuffer());
+        if (!bytes.length || bytes.length > 20 * 1024 * 1024) return json({error:"The file must be between 1 byte and 20 MB."},413,origin);
+        const filePath = "downloads/files/" + slug + "/" + filename;
+        const token = await installationToken(env);
+        await writeBinaryFile(env,token,filePath,bytes,"Upload download file: " + filename);
+        return json({path:filePath,filename},201,origin);
+      }
 const INITIAL_MAINTENANCE_REPORTS = [{
   id:"maintenance-2026-11-18",
   title:"TBRLucas Security & Reliability Review",
