@@ -206,23 +206,12 @@
     button.disabled = true;
     $("post-cover-upload-message").textContent = "Preparing a secure image upload…";
     try {
-      const access = await api("/api/upload-token");
-      const extensionByMime = {"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif"};
-      const extension = extensionByMime[file.type.toLowerCase()];
-      if (!extension) throw new Error("The selected file type is not supported.");
-      const safeName = "cover-" + Date.now() + "." + extension;
-      const filePath = "assets/images/blog/" + slug + "/" + safeName;
-      const encodedPath = filePath.split("/").map(encodeURIComponent).join("/");
-      const apiUrl = "https://api.github.com/repos/" + encodeURIComponent(access.owner) + "/" + encodeURIComponent(access.repo) + "/contents/" + encodedPath;
-      const authHeaders = {Authorization:"Bearer " + access.token, Accept:"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28"};
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      let binary = "";
-      for (let offset = 0; offset < bytes.length; offset += 0x4000) binary += String.fromCharCode(...bytes.subarray(offset, Math.min(offset + 0x4000, bytes.length)));
-      const response = await fetch(apiUrl, {method:"PUT",headers:{...authHeaders,"Content-Type":"application/json"},body:JSON.stringify({message:"Upload blog cover image: "+safeName,content:btoa(binary),branch:"main"})});
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.message || "GitHub rejected the upload (" + response.status + ").");
+      const uploaded = await api("/api/upload/blog-cover?slug=" + encodeURIComponent(slug), {
+        method:"POST", headers:{"Content-Type":file.type}, body:file
+      });
+      const encodedPath = uploaded.path.split("/").map(encodeURIComponent).join("/");
       $("post-cover-image").value = location.origin + siteBase + encodedPath;
-      $("post-cover-upload-message").textContent = "Image uploaded. Save the publication to apply the cover.";
+      $("post-cover-upload-message").textContent = "Image uploaded by the server. Save the publication to apply the cover.";
     } catch (error) {
       $("post-cover-upload-message").textContent = "Upload failed: " + error.message;
     } finally { button.disabled = false; }
@@ -326,7 +315,7 @@
     const fileInput = $("download-file");
     const file = fileInput.files && fileInput.files[0];
     if (!file) { $("download-upload-message").textContent = "Choose a file first."; return; }
-    if (file.size > 100 * 1024 * 1024) { $("download-upload-message").textContent = "This file is larger than the 100 MB limit."; return; }
+    if (file.size > 20 * 1024 * 1024) { $("download-upload-message").textContent = "This file is larger than the 20 MB limit."; return; }
     if (!/\.(ipa|apk|zip|deb|dylib|exe|msi|7z|tar|gz|pdf)$/i.test(String(file.name || ""))) { $("download-upload-message").textContent = "Choose one of the supported file types shown above."; return; }
     const slug = $("download-slug").value.trim() || slugify($("download-title").value);
     if (!slug) { $("download-upload-message").textContent = "Enter the application name first."; return; }
@@ -334,51 +323,14 @@
     $("download-upload-message").textContent = "Preparing a secure GitHub upload…";
     $("upload-download-file").disabled = true;
     try {
-      const access = await api("/api/upload-token");
-      const originalName = String(file.name || "download.bin").split(/[\\\\/]/).pop();
-      const safeName = originalName.normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,120) || "download.bin";
-      const filePath = "downloads/files/" + slug + "/" + safeName;
-      const encodedPath = filePath.split("/").map(encodeURIComponent).join("/");
-      const apiUrl = "https://api.github.com/repos/" + encodeURIComponent(access.owner) + "/" + encodeURIComponent(access.repo) + "/contents/" + encodedPath;
-      const authHeaders = {Authorization:"Bearer " + access.token, Accept:"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28"};
-      let existingSha = "";
-      const existingResponse = await fetch(apiUrl + "?ref=main", {headers:authHeaders});
-      if (existingResponse.ok) {
-        const existing = await existingResponse.json();
-        existingSha = existing.sha || "";
-      } else if (existingResponse.status !== 404) {
-        const detail = await existingResponse.json().catch(() => ({}));
-        throw new Error(detail.message || "Could not check the destination file (" + existingResponse.status + ").");
-      }
-      $("download-upload-message").textContent = "Encoding file in your browser…";
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const parts = [];
-      const chunkSize = 0x6000;
-      for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-        const chunk = bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length));
-        let binary = "";
-        for (let i = 0; i < chunk.length; i += 0x4000) {
-          binary += String.fromCharCode(...chunk.subarray(i, Math.min(i + 0x4000, chunk.length)));
-        }
-        parts.push(btoa(binary));
-      }
-      const base64 = parts.join("");
-      const message = "Upload download file: " + safeName;
-      const payload = JSON.stringify({
-        message,
-        content: base64,
-        branch: "main",
-        ...(existingSha ? {sha:existingSha} : {})
+      const uploaded = await api("/api/upload/download?slug=" + encodeURIComponent(slug) + "&filename=" + encodeURIComponent(file.name || "download.bin"), {
+        method:"POST", headers:{"Content-Type":"application/octet-stream"}, body:file
       });
-      $("download-upload-message").textContent = "Sending file directly to GitHub…";
-      const response = await fetch(apiUrl, {method:"PUT", headers:{...authHeaders, "Content-Type":"application/json"}, body:payload});
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.message || "GitHub rejected the upload (" + response.status + ").");
-      const publicUrl = location.origin + siteBase + filePath.split("/").map(encodeURIComponent).join("/");
+      const publicUrl = location.origin + siteBase + uploaded.path.split("/").map(encodeURIComponent).join("/");
       $("download-url").value = publicUrl;
       $("download-size").value = (file.size / (1024 * 1024)).toFixed(1) + " MB";
-      $("download-type").value = safeName.includes(".") ? safeName.split(".").pop().toUpperCase() : "FILE";
-      $("download-upload-message").textContent = "Upload complete. The file is committed in the repository and the download URL is ready.";
+      $("download-type").value = uploaded.filename.includes(".") ? uploaded.filename.split(".").pop().toUpperCase() : "FILE";
+      $("download-upload-message").textContent = "Upload complete. The Worker committed the file and prepared its download URL.";
     } catch (error) {
       const detail = error instanceof TypeError ? "The browser could not reach GitHub. Check the connection and retry; the file was not marked as uploaded." : error.message;
       $("download-upload-message").textContent = "Upload failed: " + detail;
@@ -615,9 +567,8 @@
     $("maintenance-preview-reason").textContent = maintenanceSettings.reason || "Not specified";
   }
   async function loadMaintenanceSettings() {
-    const response = await fetch("../assets/data/maintenance.json?ts=" + Date.now(), {cache:"no-store"});
-    if (!response.ok) throw new Error("Could not read maintenance.json (" + response.status + ").");
-    maintenanceSettings = await response.json();
+    const data = await api("/api/maintenance");
+    maintenanceSettings = data.settings;
     $("maintenance-enabled").checked = maintenanceSettings.enabled === true;
     $("maintenance-eta").value = maintenanceSettings.eta || "";
     $("maintenance-reason").value = maintenanceSettings.reason || "";
@@ -645,22 +596,7 @@
     try {
       $("save-maintenance-button").disabled = true;
       maintenanceMessage("Saving settings to GitHub…");
-      const access = await api("/api/upload-token");
-      const filePath = "assets/data/maintenance.json";
-      const encodedPath = filePath.split("/").map(encodeURIComponent).join("/");
-      const apiUrl = "https://api.github.com/repos/" + encodeURIComponent(access.owner) + "/" + encodeURIComponent(access.repo) + "/contents/" + encodedPath;
-      const headers = {Authorization:"Bearer " + access.token, Accept:"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28"};
-      const currentResponse = await fetch(apiUrl + "?ref=main", {headers});
-      if (!currentResponse.ok) throw new Error("Could not read the current settings (" + currentResponse.status + ").");
-      const current = await currentResponse.json();
-      const bytes = new TextEncoder().encode(JSON.stringify(settings, null, 2) + "\n");
-      let binary = "";
-      bytes.forEach(byte => binary += String.fromCharCode(byte));
-      const response = await fetch(apiUrl, {method:"PUT",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({
-        message:"Update website maintenance settings",content:btoa(binary),branch:"main",sha:current.sha
-      })});
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.message || "GitHub rejected the settings (" + response.status + ").");
+      await api("/api/maintenance", {method:"POST", body:JSON.stringify(settings)});
       maintenanceSettings = settings;
       renderMaintenancePreview();
       maintenanceMessage("Settings saved and committed. The public site will update after GitHub Pages deploys.");
