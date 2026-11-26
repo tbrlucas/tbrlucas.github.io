@@ -28,7 +28,7 @@ body { min-width:320px; padding-top:60px; }
 .post-empty { margin:0; padding:15px; color:#777; }
 .post-list { padding:0; }
 .notice-copy { margin:24px 0; padding:15px; background:#f5f5f5; border:1px solid #ddd; border-radius:4px; }
-.site-footer { margin:24px 0 0; padding:0 0 24px; color:#999; font-size:12px; }
+.site-footer { margin:24px 0 0; padding:0 0 24px; color:#6f6f6f; font-size:12px; }
 .site-footer .breadcrumb { margin-bottom:12px; }
 .page-title { margin-bottom:18px; padding-bottom:8px; border-bottom:1px solid #eee; }
 .article-panel { padding:20px; }
@@ -486,7 +486,7 @@ body { min-width:320px; padding-top:60px; }
 .site-footer .breadcrumb { display:flex; align-items:center; flex-wrap:wrap; gap:0; }
 .site-footer .breadcrumb li { float:none; display:flex; align-items:center; }
 .site-footer .breadcrumb li+li:before { content:"/"; padding:0 10px; color:#bbb; }
-.site-footer .breadcrumb li.active { color:#777; }
+.site-footer .breadcrumb li.active { color:#6f6f6f; }
 
 
 /* Aero special edition: Windows 7-inspired glass editorial theme. */
