@@ -61,17 +61,7 @@ Some sections use JSON files to keep content separate from page markup.
 
 Content entries generally include a title, URL slug, description, and publication status. Entries marked as unpublished are intended to remain out of the public-facing listings.
 
-## Administration
 
-The `/alcatelonetouch3075m/` route contains the site's content-management panel for blog posts, downloads, What's New entries, and maintenance settings.
-
-The page is publicly hosted as a static interface, but administrative operations require GitHub authentication and server-side authorization through the Cloudflare Worker. The route itself is not a security boundary, and its address must not be treated as a secret.
-
-## Administration
-
-The website has a separate, access-controlled administration interface for maintaining selected content. Its API is handled independently from the static GitHub Pages frontend.
-
-Access is restricted to an authorized GitHub account. Administrative access depends on authentication and server-side authorization checks, not on keeping the interface address private.
 
 ## Security
 
